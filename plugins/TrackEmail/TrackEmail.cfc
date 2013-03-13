@@ -17,6 +17,72 @@
 	</cffunction>
 	
 	
+	<cffunction name="_initVars" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Initialize variables needed by component for tracking">
+		
+		<cfset this.site = application.applicationName />
+		<cfset this.baseUrl = cgi.server_name & application.wheels.webPath />
+		<cfset this.dsn = application.wheels.datasourcename />
+		
+		<cfif getPageContext().getRequest().isSecure()>
+			<cfset this.baseUrl = "https://" & this.baseUrl />
+		<cfelse>
+			<cfset this.baseUrl = "http://" & this.baseUrl />
+		</cfif>
+		
+	</cffunction>
+	
+	
+	<cffunction name="_addTracking" 
+				returntype="string" 
+				access="public" 
+				output="false"
+				hint="Replaces links with tracking links and adds tracking image to email">
+		
+		<cfargument 
+			name="content" 
+			type="string" 
+			required="true" 
+			hint="The email body that is going to be modified." />
+			
+		<cfargument 
+			name="uuid" 
+			type="string" 
+			required="true" 
+			hint="The uuid for the email that is being sent." />
+		
+		<cfscript>
+		
+			var loc = {};
+			
+			//Set variables to use
+			_initVars();
+			
+			//Add ending slash if doesn't exist
+			if ( Right( this.baseUrl, 1 ) != '/' )
+			{
+				this.baseUrl = this.baseUrl & '/';
+			}
+			
+			//Create the base tracking url
+			loc.trackUrl = "#this.baseUrl#index.cfm?controller=wheels&action=wheels&view=plugins&name=trackemail&page=track&e=#arguments.uuid#";
+			
+			//Replace the links in the email with a tracking link
+			loc.content = Replace( arguments.content, '<a href="', '<a href="#loc.trackUrl#&t=l&u=', 'all' );
+			loc.content = Replace( loc.content, "<a href='", "<a href='#loc.trackUrl#&t=l&u=", "all" );
+			
+			//Add a tracking image to the end of the email
+			loc.content = loc.content & '<img src="#loc.trackUrl#&t=o" width="0" height="0" style="display:none;" />';
+			
+			return loc.content;
+		</cfscript>
+	
+	</cffunction>
+	
+	
 	<cffunction name="_checkEmailTable" 
 				returntype="boolean" 
 				access="private" 
@@ -45,7 +111,7 @@
 		</cftry>
 
 		<cfreturn loc.valid />
-		
+	
 	</cffunction>
 	
 	
@@ -167,10 +233,10 @@
 			)
 					
 		</cfquery>
-		
+	
 	</cffunction>
-	
-	
+
+
 	<cffunction name="_createLinkTable" 
 				returntype="void" 
 				access="private" 
@@ -277,6 +343,97 @@
 
 	</cffunction>
 	
+
+	<cffunction name="_emailExists" 
+				returntype="any" 
+				access="public" 
+				output="false"
+				hint="Checks if an email exists, if does it it returns the email id, if not returns false">
+	
+		<cfargument 
+			name="subject" 
+			type="string" 
+			default=""
+			hint="Subject line of email being sent." />
+			
+		<cfset var loc = {} />
+		
+		<cfset _initVars() />
+		
+		<cfquery 
+			name="loc.emailExists" 
+			datasource="#this.dsn#">
+			
+			SELECT TOP 1 
+				id
+			
+			FROM 
+				trackemail_emails
+				
+			WHERE
+				site = <cfqueryparam cfsqltype="cf_sql_varchar" value="#this.site#" />
+				AND subject = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.subject#" />
+					
+		</cfquery>
+
+		<cfif loc.emailExists.recordCount eq 0>
+			<cfreturn false />
+		<cfelse>
+			<cfreturn loc.emailExists.id />
+		</cfif>
+		
+	</cffunction>
+	
+	
+	<cffunction name="_insertEmail" 
+				returntype="numeric" 
+				access="public" 
+				output="false"
+				hint="Insert email into trackemail_emails table. Returns id of email record">
+	
+		<cfargument
+			name="subject" 
+			type="string" 
+			default=""
+			hint="The subject line of the email being sent" />
+			
+		<cfargument 
+			name="body" 
+			type="string" 
+			required="true"
+			hint="The body of the email being sent" />
+		
+		<cfset var loc = {} />
+		
+		<cfset _initVars() />
+		
+		<cfquery 
+			name="loc.insertEmail" 
+			datasource="#this.dsn#"
+			result="loc.insertEmailResult">
+			
+			INSERT INTO trackemail_emails
+				(
+					site,
+					subject,
+					body,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#this.site#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.subject#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.body#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+		<cfreturn loc.insertEmailResult.IDENTITYCOL />
+		
+	</cffunction>
+	
 	
 	<cffunction name="sendEmail" returntype="any" access="public" output="false" hint="Sends an email using a template and an optional layout to wrap it in. Besides the Wheels-specific arguments documented here, you can also pass in any argument that is accepted by the `cfmail` tag as well as your own arguments to be used by the view."
 		examples=
@@ -365,12 +522,15 @@
 				}
 			}
 	
+			// does user wnat to track email
 			if ( loc.track )
 			{
 				_initVars();
 				
+				// get email id if it exists
 				loc.emailId = this._emailExists( subject=arguments.subject );
 				
+				// if email doesn't exists get body and insert
 				if ( loc.emailId == false )
 				{
 					if ( NOT StructKeyExists( arguments, "mailparts" ) == 1 && arguments.type == "html" )
@@ -382,11 +542,14 @@
 						loc.body = arguments.mailparts[ 2 ].tagContent;
 					}
 				
+					// insert email and get email id
 					loc.emailId = this._insertEmail( subject=arguments.subject, body=loc.body );
 				}
 				
+				// insert a sent record for this email, returns uuid of sent record
 				loc.uuid = this._insertSent( emailId=loc.emailId, recipient=arguments.to );
-					
+				
+				// return email body with tracking code added	
 				if ( NOT StructKeyExists( arguments, "mailparts" ) == 1 && arguments.type == "html" )
 				{
 					arguments.tagContent = this._addTracking( content=arguments.tagContent, uuid=loc.uuid );
@@ -420,6 +583,7 @@
 			else
 				return arguments;
 		</cfscript>
+		
 	</cffunction>
 	
 </cfcomponent>
