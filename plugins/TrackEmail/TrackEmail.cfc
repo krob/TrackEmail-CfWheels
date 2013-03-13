@@ -1,3 +1,15 @@
+<!---
+Adds view and click tracking code to emails, adds functions to log views and clicks
+
+Adds the following process to the sendEmail function
+	if track argument passed to sendEmail is true
+		Get email id with the same subject line exists for this site
+			Add email if doesn't exist
+		Insert a sent record for email id and recipient
+		Add tracking to email body
+		Send email
+--->
+
 <cfcomponent output="false" mixin="controller,dispatch">
 
 	<cffunction name="init" 
@@ -348,7 +360,7 @@
 				returntype="any" 
 				access="public" 
 				output="false"
-				hint="Checks if an email exists, if does it it returns the email id, if not returns false">
+				hint="Checks if an email exists with this subject line for this site, if does it it returns the email id, if not returns false">
 	
 		<cfargument 
 			name="subject" 
@@ -444,12 +456,14 @@
 		<cfargument 
 			name="sentId" 
 			type="string" 
-			required="true" />
+			required="true"
+			hint="The uuid for a particular email sent." />
 			
 		<cfargument 
 			name="link" 
 			type="string" 
-			default="" />
+			default=""
+			hint="The link the user clicked" />
 		
 		<cfset var loc = {} />
 		
@@ -481,17 +495,19 @@
 				returntype="string" 
 				access="public" 
 				output="false"
-				hint="Insert a record of an email being sent">
+				hint="Insert a record of an email being sent. Returns a uuid for this email being sent">
 	
 		<cfargument 
 			name="emailid" 
 			type="numeric" 
-			required="true" />
+			required="true"
+			hint="The id of the email being sent." />
 			
 		<cfargument 
 			name="recipient" 
 			type="string" 
-			required="true" />
+			required="true"
+			hint="The email address to which the email was sent" />
 			
 		<cfset var loc = {} />
 		
@@ -719,12 +735,14 @@
 		<cfargument 
 			name="sentId" 
 			type="string" 
-			required="true" />
+			required="true"
+			hint="The id of the email that was sent" />
 			
 		<cfargument 
 			name="link" 
 			type="string" 
-			required="true" />
+			required="true"
+			hint="The link the user clicked" />
 		
 		<cfset _initVars() />
 		
@@ -742,7 +760,8 @@
 		<cfargument 
 			name="sentId" 
 			type="string" 
-			required="true" />
+			required="true"
+			hint="The id of the email that was sent" />
 			
 		<cfset _initVars() />
 		
