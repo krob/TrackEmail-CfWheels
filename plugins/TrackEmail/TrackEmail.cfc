@@ -95,7 +95,7 @@
 			
 		<cfset var loc = {} />
 		
-		<cfset this._initVars() />
+		<cfset _initVars() />
 		
 		<cfquery 
 			name="loc.emailExists" 
@@ -142,7 +142,7 @@
 		
 		<cfset var loc = {} />
 		
-		<cfset this._initVars() />
+		<cfset _initVars() />
 		
 		<cfquery 
 			name="loc.insertEmail" 
