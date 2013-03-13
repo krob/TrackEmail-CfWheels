@@ -75,7 +75,7 @@
 			loc.content = Replace( loc.content, "<a href='", "<a href='#loc.trackUrl#&t=l&u=", "all" );
 			
 			//Add a tracking image to the end of the email
-			loc.content = loc.content & '<img src="#loc.trackUrl#&t=o" width="0" height="0" style="display:none;" />';
+			loc.content = loc.content & '<img src="#loc.trackUrl#&t=v" width="0" height="0" style="display:none;" />';
 			
 			return loc.content;
 		</cfscript>
@@ -435,6 +435,129 @@
 	</cffunction>
 	
 	
+	<cffunction name="_insertLink" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Insert a record of someone clicking on a link">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true" />
+			
+		<cfargument 
+			name="link" 
+			type="string" 
+			default="" />
+		
+		<cfset var loc = {} />
+		
+		
+		<cfquery 
+			name="loc.insertLink" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_links
+				(
+					sentId,
+					link,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#arguments.sentId#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.link#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+	</cffunction>
+	
+	
+	<cffunction name="_insertSent" 
+				returntype="string" 
+				access="public" 
+				output="false"
+				hint="Insert a record of an email being sent">
+	
+		<cfargument 
+			name="emailid" 
+			type="numeric" 
+			required="true" />
+			
+		<cfargument 
+			name="recipient" 
+			type="string" 
+			required="true" />
+			
+		<cfset var loc = {} />
+		
+		<cfset loc.uuid = CreateUUID() />
+		
+		<cfquery 
+			name="loc.insertSent" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_sent
+				(
+					id,
+					emailid,
+					recipient,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#loc.uuid#" />,
+					<cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailid#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.recipient#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+		<cfreturn loc.uuid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_insertView" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Insert a record of someone viewing an email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true" />
+			
+		<cfset var loc = {} />
+
+		<cfquery 
+			name="loc.insertView" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_views
+				(
+					sentId,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#arguments.sentId#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+	</cffunction>
+	
+	
 	<cffunction name="sendEmail" returntype="any" access="public" output="false" hint="Sends an email using a template and an optional layout to wrap it in. Besides the Wheels-specific arguments documented here, you can also pass in any argument that is accepted by the `cfmail` tag as well as your own arguments to be used by the view."
 		examples=
 		'
@@ -584,6 +707,47 @@
 				return arguments;
 		</cfscript>
 		
+	</cffunction>
+	
+	
+	<cffunction name="logLink" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone clicked on a link in an email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true" />
+			
+		<cfargument 
+			name="link" 
+			type="string" 
+			required="true" />
+		
+		<cfset _initVars() />
+		
+		<cfset _insertLink( sentId=arguments.sentId, link=arguments.link ) />
+
+	</cffunction>
+	
+	
+	<cffunction name="logView" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone viewed the email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true" />
+			
+		<cfset _initVars() />
+		
+		<cfset _insertView( sentId=arguments.sentId ) />
+
 	</cffunction>
 	
 </cfcomponent>
