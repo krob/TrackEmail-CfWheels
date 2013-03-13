@@ -8,8 +8,273 @@
 		
 		<cfset this.version = "0.1" />
 		
+		<cfset _initVars() />
+		
+		<cfset _createTables() />
+		
 		<cfreturn this />
 		
+	</cffunction>
+	
+	
+	<cffunction name="_checkEmailTable" 
+				returntype="boolean" 
+				access="private" 
+				output="false"
+				hint="Check if the email table exists">
+		
+		<cfset var loc = {} />
+		
+		<cfset loc.valid = true />
+		
+		<cftry>
+			<cfquery 
+				name="loc.checkEmailTable"
+				datasource="#this.dsn#">
+		
+				SELECT TOP 1 id
+				
+				FROM
+					trackemail_emails
+			
+			</cfquery>
+			
+			<cfcatch>
+				<cfset loc.valid = false />
+			</cfcatch>
+		</cftry>
+
+		<cfreturn loc.valid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_checkLinkTable" 
+				returntype="boolean" 
+				access="private" 
+				output="false"
+				hint="Check if the link table exists">
+		
+		<cfset var loc = {} />
+		
+		<cfset loc.valid = true />
+		
+		<cftry>
+			<cfquery 
+				name="loc.checkLinkTable"
+				datasource="#this.dsn#">
+		
+				SELECT TOP 1 id
+				
+				FROM
+					trackemail_links
+			
+			</cfquery>
+			
+			<cfcatch>
+				<cfset loc.valid = false />
+			</cfcatch>
+		</cftry>
+
+		<cfreturn loc.valid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_checkSentTable" 
+			returntype="boolean" 
+			access="private" 
+			output="false"
+			hint="Check if the sent table exists">
+		
+		<cfset var loc = {} />
+		
+		<cfset loc.valid = true />
+		
+		<cftry>
+			<cfquery 
+				name="loc.checkSentTable"
+				datasource="#this.dsn#">
+		
+				SELECT TOP 1 id
+				
+				FROM
+					trackemail_sent
+			
+			</cfquery>
+			
+			<cfcatch>
+				<cfset loc.valid = false />
+			</cfcatch>
+		</cftry>
+		
+		<cfreturn loc.valid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_checkViewTable" 
+				returntype="boolean" 
+				access="private" 
+				output="false"
+				hint="Check if the view table exists">
+		
+		<cfset var loc = {} />
+		
+		<cfset loc.valid = true />
+		
+		<cftry>
+			<cfquery 
+				name="loc.checkViewTable"
+				datasource="#this.dsn#">
+		
+				SELECT TOP 1 id
+				
+				FROM
+					trackemail_views
+			
+			</cfquery>
+			
+			<cfcatch>
+				<cfset loc.valid = false />
+			</cfcatch>
+		</cftry>
+		
+		<cfreturn loc.valid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_createEmailTable" 
+				returntype="void" 
+				access="private" 
+				output="false"
+				hint="Create the email table">
+		
+		<cfset var loc = {} />
+		
+		<cfquery 
+			name="loc.createEmailTable"
+			datasource="#this.dsn#">
+				
+			CREATE TABLE trackemail_emails(
+				id int IDENTITY(1,1) NOT NULL,
+				site varchar(50) NOT NULL,
+				subject varchar(255) NULL,
+				body text NOT NULL,
+				createdAt datetime NOT NULL,
+				CONSTRAINT "pk_trackemail_email-id" PRIMARY KEY (id)
+			)
+					
+		</cfquery>
+		
+	</cffunction>
+	
+	
+	<cffunction name="_createLinkTable" 
+				returntype="void" 
+				access="private" 
+				output="false"
+				hint="Create the link table">
+		
+		<cfset var loc = {} />
+		
+		<cfquery 
+			name="loc.createLinkTable"
+			datasource="#this.dsn#">
+				
+			CREATE TABLE trackemail_links(
+				id int IDENTITY(1,1) NOT NULL,
+				sentid char(35) NOT NULL,
+				link varchar(255) NOT NULL,
+				createdAt datetime NOT NULL,
+				CONSTRAINT "pk_trackemail_links-id" PRIMARY KEY (id)
+			)
+					
+		</cfquery>
+		
+	</cffunction>
+	
+	
+	<cffunction name="_createTables" 
+				returntype="void" 
+				access="private" 
+				output="false"
+				hint="Create the tables needed for tracking">
+		
+		<cftry>
+			
+			<cfif NOT _checkEmailTable()>
+				<cfset _createEmailTable() />
+			</cfif>
+			
+			<cfif NOT _checkLinkTable()>
+				<cfset _createLinkTable() />
+			</cfif>
+			
+			<cfif NOT _checkSentTable()>
+				<cfset _createSentTable() />
+			</cfif>
+			
+			<cfif NOT _checkViewTable()>
+				<cfset _createViewTable() />
+			</cfif>
+			
+			<cfcatch>
+				<cfthrow message="Error creating tables, you may need to create them manually. See sql in db folder." />
+			</cfcatch>
+				
+		</cftry>
+		
+	</cffunction>
+	
+	
+	<cffunction name="_createSentTable" 
+				returntype="void" 
+				access="private" 
+				output="false"
+				hint="Create the sent table">
+		
+		<cfset var loc = {} />
+		
+		<cfquery 
+			name="loc.createSentTable" 
+			datasource="#this.dsn#">
+				
+			CREATE TABLE trackemail_sent(
+				id char(35) NOT NULL,
+				emailid int NOT NULL,
+				recipient varchar(255) NOT NULL,
+				createdAt datetime NOT NULL,
+				CONSTRAINT "pk_trackemail_sent-id" PRIMARY KEY (id)
+			)
+					
+		</cfquery>
+
+	</cffunction>
+	
+	
+	<cffunction name="_createViewTable" 
+				returntype="void" 
+				access="private" 
+				output="false"
+				hint="Create the view table">
+		
+		<cfset var loc = {} />
+		
+		<cfquery 
+			name="loc.createViewTable" 
+			datasource="#this.dsn#">
+				
+			CREATE TABLE trackemail_views(
+				id int IDENTITY(1,1) NOT NULL,
+				sentid char(35) NOT NULL,
+				createdAt datetime NOT NULL,
+				CONSTRAINT "pk_trackemail_views-id" PRIMARY KEY (id)
+			)
+					
+		</cfquery>
+
 	</cffunction>
 	
 	
