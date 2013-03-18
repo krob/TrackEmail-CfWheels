@@ -1,10 +1,17 @@
 <cfcomponent extends="Controller" output="false">
 
-	<cffunction name="test">
+	<cffunction name="sendTest"
+		hint="Send a email for testing track email functionality">
 	
-		<cfset sendEmail( from="krobertson@nc4ea.org", to="krobertson@nc4ea.org", subject="test", template="email", track=true ) />
+		<cfset sendEmail( 
+			from="#params.fromEmailAddress#", 
+			to="#params.toEmailAddress#", 
+			subject="#params.subject#", 
+			template="email", 
+			track=true 
+		) />
 	
-		<cfset renderText( "Success" ) />
+		<cfset renderText( "Test email was sent." ) />
 
 	</cffunction>
 	
