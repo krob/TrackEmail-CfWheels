@@ -1,3 +1,15 @@
+<!---
+Adds view and click tracking code to emails, adds functions to log views and clicks
+
+Adds the following process to the sendEmail function
+	if track argument passed to sendEmail is true
+		Get email id with the same subject line exists for this site
+			Add email if doesn't exist
+		Insert a sent record for email id and recipient
+		Add tracking to email body
+		Send email
+--->
+
 <cfcomponent output="false" mixin="controller,dispatch">
 
 	<cffunction name="init" 
@@ -75,7 +87,7 @@
 			loc.content = Replace( loc.content, "<a href='", "<a href='#loc.trackUrl#&t=l&u=", "all" );
 			
 			//Add a tracking image to the end of the email
-			loc.content = loc.content & '<img src="#loc.trackUrl#&t=o" width="0" height="0" style="display:none;" />';
+			loc.content = loc.content & '<img src="#loc.trackUrl#&t=v" width="0" height="0" style="display:none;" />';
 			
 			return loc.content;
 		</cfscript>
@@ -348,7 +360,7 @@
 				returntype="any" 
 				access="public" 
 				output="false"
-				hint="Checks if an email exists, if does it it returns the email id, if not returns false">
+				hint="Checks if an email exists with this subject line for this site, if does it it returns the email id, if not returns false">
 	
 		<cfargument 
 			name="subject" 
@@ -432,6 +444,133 @@
 
 		<cfreturn loc.insertEmailResult.IDENTITYCOL />
 		
+	</cffunction>
+	
+	
+	<cffunction name="_insertLink" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Insert a record of someone clicking on a link">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true"
+			hint="The uuid for a particular email sent." />
+			
+		<cfargument 
+			name="link" 
+			type="string" 
+			default=""
+			hint="The link the user clicked" />
+		
+		<cfset var loc = {} />
+		
+		
+		<cfquery 
+			name="loc.insertLink" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_links
+				(
+					sentId,
+					link,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#arguments.sentId#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.link#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+	</cffunction>
+	
+	
+	<cffunction name="_insertSent" 
+				returntype="string" 
+				access="public" 
+				output="false"
+				hint="Insert a record of an email being sent. Returns a uuid for this email being sent">
+	
+		<cfargument 
+			name="emailid" 
+			type="numeric" 
+			required="true"
+			hint="The id of the email being sent." />
+			
+		<cfargument 
+			name="recipient" 
+			type="string" 
+			required="true"
+			hint="The email address to which the email was sent" />
+			
+		<cfset var loc = {} />
+		
+		<cfset loc.uuid = CreateUUID() />
+		
+		<cfquery 
+			name="loc.insertSent" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_sent
+				(
+					id,
+					emailid,
+					recipient,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#loc.uuid#" />,
+					<cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailid#" />,
+					<cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.recipient#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
+		<cfreturn loc.uuid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="_insertView" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Insert a record of someone viewing an email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true" />
+			
+		<cfset var loc = {} />
+
+		<cfquery 
+			name="loc.insertView" 
+			datasource="#this.dsn#">
+			
+			INSERT INTO trackemail_views
+				(
+					sentId,
+					createdAt
+				) 
+			
+			VALUES
+				(
+					<cfqueryparam cfsqltype="cf_sql_char" value="#arguments.sentId#" />,
+					<cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#" />
+				)
+			
+		</cfquery>
+
 	</cffunction>
 	
 	
@@ -584,6 +723,50 @@
 				return arguments;
 		</cfscript>
 		
+	</cffunction>
+	
+	
+	<cffunction name="logLink" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone clicked on a link in an email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true"
+			hint="The id of the email that was sent" />
+			
+		<cfargument 
+			name="link" 
+			type="string" 
+			required="true"
+			hint="The link the user clicked" />
+		
+		<cfset _initVars() />
+		
+		<cfset _insertLink( sentId=arguments.sentId, link=arguments.link ) />
+
+	</cffunction>
+	
+	
+	<cffunction name="logView" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone viewed the email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true"
+			hint="The id of the email that was sent" />
+			
+		<cfset _initVars() />
+		
+		<cfset _insertView( sentId=arguments.sentId ) />
+
 	</cffunction>
 	
 </cfcomponent>
