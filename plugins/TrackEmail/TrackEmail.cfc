@@ -397,6 +397,390 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
+	<cffunction name="getEmails" 
+				returntype="query" 
+				access="public" 
+				output="false"
+				hint="Returns a query of emails that are being tracked">
+				
+		<cfset var loc = {} />
+
+		<!--- Set variables to use --->
+		<cfset _initVars() />
+		
+		<cfquery 
+			name="loc.emails" 
+			datasource="#this.dsn#">
+			
+			SELECT
+				trackemail_emails.id,
+				trackemail_emails.subject,
+				Count( trackemail_sent.id ) AS numberSent
+				
+			FROM 
+				trackemail_emails INNER JOIN trackemail_sent ON
+				trackemail_emails.id = trackemail_sent.emailId
+				
+			WHERE
+				trackemail_emails.site = <cfqueryparam cfsqltype="cf_sql_string" value="#this.site#" />
+				
+			GROUP BY
+				trackemail_emails.id,
+				trackemail_emails.subject
+				
+			ORDER BY trackemail_emails.subject
+		</cfquery>
+
+		<cfreturn loc.emails />
+		
+	</cffunction>
+	
+	
+	<cffunction name="getEmailReport" 
+				returntype="struct" 
+				access="public" 
+				output="true"
+				hint="Returns a struct of data for reporting">
+				
+		<cfargument 
+			name="emailId" 
+			type="numeric" 
+			required="true" />
+			
+		<cfargument 
+			name="startDate" 
+			type="date" 
+			default="#DateAdd( 'm', -1, now() )#" />
+			
+		<cfargument 
+			name="endDate" 
+			type="date" 
+			default="#now()#" />
+			
+		<cfset var loc = {} />
+		
+		<!--- Create report struct to hold data --->
+		<cfset loc.report = {} />
+		
+		<!--- Create start and end date from the dates passed in the arguments --->
+		<cfset loc.startDate = CreateDateTime( Year( arguments.startDate ), Month( arguments.startDate ), Day( arguments.startDate ), 0, 0, 0 ) />
+		<cfset loc.endDate = CreateDateTime( Year( arguments.endDate ), Month( arguments.endDate ), Day( arguments.endDate ), 23, 59, 59 ) />
+		
+		<!--- Get the difference in days between start date and end date --->
+		<cfset loc.days = Abs( DateDiff( "d", loc.startDate, loc.endDate ) ) />
+		
+		<!--- Set variables to use --->
+		<cfset _initVars() />
+		
+		<!--- Get the record for this email to display subject and body --->
+		<cfquery
+			name="loc.getEmail"
+			datasource="#this.dsn#">
+			
+			SELECT 
+				*
+			
+			FROM
+				trackemail_emails
+				
+			WHERE 
+				id = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+		</cfquery>
+		
+		<cfset loc.report.email = loc.getEmail />
+		
+		<!--- Get the number of emails sent, the number of views, and the number of clicks grouped by date --->
+		<cfquery
+			name="loc.byDate"
+			datasource="#this.dsn#">
+			
+			SELECT
+				Count( id ) AS number,
+				DATEADD( dd, 0, DATEDIFF( dd, 0, createdAt ) ) AS createdAt,
+				'sent' AS type
+				
+			FROM
+				trackemail_sent
+				
+			WHERE
+				createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			GROUP BY
+				DATEADD( dd, 0, DATEDIFF( dd, 0, createdAt ) )
+			
+			
+			UNION SELECT
+				Count( trackemail_views.id ) AS number,
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_views.createdAt ) ) AS createdAt,
+				'view' AS type
+				
+			FROM
+				trackemail_views INNER JOIN trackemail_sent ON
+				trackemail_views.sentId = trackemail_sent.id
+				
+			WHERE
+				trackemail_views.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_views.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			GROUP BY
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_views.createdAt ) )
+			
+			
+			UNION SELECT
+				Count( trackemail_links.id ) AS number,
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_links.createdAt ) ) AS createdAt,
+				'click' AS type
+				
+			FROM
+				trackemail_links INNER JOIN trackemail_sent ON
+				trackemail_links.sentId = trackemail_sent.id
+				
+			WHERE
+				trackemail_links.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_links.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			GROUP BY
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_links.createdAt ) )
+				
+			ORDER BY 
+				createdAt
+				
+		</cfquery>
+		
+		
+		<!--- Get the number of clicks by link and by date --->
+		<cfquery
+			name="loc.linkClicksBydate"
+			datasource="#this.dsn#">
+			
+			SELECT
+				Count( trackemail_links.id ) AS numberClicks,
+				link,
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_links.createdAt ) ) AS dateClick
+				
+			FROM
+				trackemail_links INNER JOIN trackemail_sent ON
+				trackemail_links.sentId = trackemail_sent.id
+			
+			WHERE
+				trackemail_links.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_links.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			GROUP BY
+				link,
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_links.createdAt ) )
+				
+			ORDER BY 
+				DATEADD( dd, 0, DATEDIFF( dd, 0, trackemail_links.createdAt ) ),
+				link
+		</cfquery>
+		
+		<!--- Create a struct of all the possible dates that will contain the number of emails sent, views, and clicks --->
+		<cfloop 
+			from="0" 
+			to="#loc.days#" 
+			index="loc.j">
+		
+			<cfset loc.tempDate = DateFormat( DateAdd( "d", loc.j, loc.startDate ), "mm/dd/yyyy" ) />
+			
+			<cfset loc.dataByDate[ loc.tempDate ] = {} />
+			<cfset loc.dataByDate[ loc.tempDate ].sent = 0 />
+			<cfset loc.dataByDate[ loc.tempDate ].views = 0 />
+			<cfset loc.dataByDate[ loc.tempDate ].clicks = 0 />
+			
+			<cfset loc.dataLinkClicksByDate[ loc.tempDate ] = {} />
+			
+			<!--- Loop through the links to create a struct of links and number of times clicked by date --->
+			<cfloop 
+				list="#ValueList( loc.linkClicksByDate.link )#" 
+				index="loc.l">
+		
+				<!--- Init data for date and link --->
+				<cfset loc.dataLinkClicksByDate[ loc.tempDate ][ loc.l ] = 0 />
+				
+				<!--- Get number of clicks by data and link --->
+				<cfquery 
+					name="loc.q" 
+					dbtype="query">
+				
+					SELECT
+						numberClicks
+						
+					FROM
+						loc.linkClicksByDate
+						
+					WHERE
+						link = '#loc.l#'
+						AND dateClick = '#loc.tempDate#'
+						
+				</cfquery>
+				
+				<cfif loc.q.recordCount gt 0>
+					<cfset loc.dataLinkClicksByDate[ loc.tempDate ][ loc.l ] = loc.q.numberClicks />
+				</cfif>
+				
+			</cfloop>
+			
+		</cfloop>
+		
+		<!--- Populate the struct of dates that was created in the loop above --->
+		<cfloop 
+			query="loc.byDate">
+			
+			<cfif loc.byDate.type eq "sent">
+				
+				<cfset loc.dataByDate[ DateFormat( loc.byDate.createdAt, "mm/dd/yyyy" ) ].sent = number />
+			
+			<cfelseif loc.byDate.type eq "view">
+				
+				<cfset loc.dataByDate[ DateFormat( loc.byDate.createdAt, "mm/dd/yyyy" ) ].views = number />
+			
+			<cfelseif loc.byDate.type eq "click">
+				
+				<cfset loc.dataByDate[ DateFormat( loc.byDate.createdAt, "mm/dd/yyyy" ) ].clicks = number />
+			
+			</cfif>
+			
+		</cfloop>
+		
+		<!--- This query gets individual email information to display --->
+		<cfquery 
+			name="loc.report.emails" 
+			datasource="#this.dsn#">
+			
+			SELECT
+				trackemail_sent.id,
+				trackemail_sent.recipient,
+				trackemail_sent.createdAt AS sentOn,
+				'' AS link,
+				'sent' AS type,
+				trackemail_sent.createdAt
+
+			FROM 
+				trackemail_sent
+				
+			WHERE
+				trackemail_sent.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_sent.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			
+			UNION SELECT
+				trackemail_sent.id,
+				trackemail_sent.recipient,
+				trackemail_sent.createdAt AS sentOn,
+				'' AS link,
+				'view' AS type,
+				trackemail_views.createdAt
+
+			FROM 
+				trackemail_views RIGHT JOIN trackemail_sent ON trackemail_sent.id = trackemail_views.sentId
+				
+			WHERE
+				trackemail_views.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_views.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+				
+			
+			UNION SELECT
+				trackemail_sent.id,
+				trackemail_sent.recipient,
+				trackemail_sent.createdAt AS sentOn,
+				trackemail_links.link,
+				'click' AS type,
+				trackemail_links.createdAt
+				
+			FROM 
+				trackemail_links RIGHT JOIN trackemail_sent ON trackemail_sent.id = trackemail_links.sentId
+				
+			WHERE
+				trackemail_links.createdAt >= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.startDate#" />
+				AND trackemail_links.createdAt <= <cfqueryparam cfsqltype="cf_sql_timestamp" value="#loc.endDate#" />
+				AND trackemail_sent.emailId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.emailId#" />
+			
+			ORDER BY 
+				recipient, 
+				id, 
+				type DESC, 
+				link
+		</cfquery>
+
+		<!--- Create json array of sent, views, and clicks to be used by google charts --->
+		<cfsavecontent variable="loc.report.summaryChartData">
+			<cfoutput>
+			<cfloop 
+				list="#ListSort( StructKeyList( loc.dataByDate ), 'text', 'ASC' )#" 
+				index="loc.itemDate">
+				
+				[ '#DateFormat(  loc.itemDate, "mm/dd/yyyy" )#', #loc.dataByDate[ loc.itemDate ].sent#, #loc.dataByDate[ loc.itemDate ].views#, #loc.dataByDate[ loc.itemDate ].clicks# ],
+				
+			</cfloop>
+			</cfoutput>
+		</cfsavecontent>
+		
+		<!--- Add column name information to json --->
+		<cfset loc.report.summaryChartData = "['Date', 'Sent', 'Views', 'Clicks']," & Left( loc.report.summaryChartData, Len( loc.report.summaryChartData ) - 1 ) />
+		
+		<!--- Start the header row json --->
+		<cfset loc.rowHead = "[ 'Date'," />
+		
+		<cfset loc.count = 1 />
+		
+		<cfif loc.linkClicksByDate.recordCount gt 0>
+			<cfset loc.report.hasLinkData = true />
+			
+			<cfsavecontent variable="loc.report.linkChartData">
+				<cfoutput>
+					
+				<!--- Loop through the dates we have clicks on --->
+				<cfloop 
+					list="#ListSort( StructKeyList( loc.dataLinkClicksByDate ), 'text', 'ASC' )#" 
+					index="loc.itemDate">
+				
+					<!--- Start json row --->
+					<cfset loc.row = "[ '#DateFormat( loc.itemDate, "mm/dd/yyyy" )#'," />
+					
+					<cfloop 
+						collection=#loc.dataLinkClicksByDate[ loc.itemDate ]# 
+						item="loc.itemLink">
+						
+						<!--- If this is the first date we are looping through add the link to the row header --->
+						<cfif loc.count eq 1>
+							<cfset loc.rowHead = loc.rowHead & "'#loc.itemLink#'," />	
+						</cfif>
+						
+						<cfset loc.row = loc.row & "#loc.dataLinkClicksByDate[ loc.itemDate ][ loc.itemLink ]#," />
+					</cfloop>
+					
+					<!--- If this is the first date we are looping through close the row header --->
+					<cfif loc.count eq 1>
+						<cfset loc.rowHead = Left( loc.rowHead, Len( loc.rowHead ) - 1 ) & "]," />
+					</cfif>
+					
+					<cfset loc.row = Left( loc.row, Len( loc.row ) - 1 ) & "]," />
+					
+					<cfset loc.count++ />
+					
+				</cfloop>
+				</cfoutput>
+			</cfsavecontent>
+			
+			<!--- Join the row and the row header --->
+			<cfset loc.report.linkChartData = loc.rowHead & Left( loc.report.linkChartData, Len( loc.report.linkChartData ) - 1 ) />
+		<cfelse>
+			<cfset loc.report.hasLinkData = false />
+		</cfif>
+		
+		<cfreturn loc.report />
+	</cffunction>
+	
+	
 	<cffunction name="_insertEmail" 
 				returntype="numeric" 
 				access="public" 
