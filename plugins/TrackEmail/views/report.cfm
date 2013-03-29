@@ -41,9 +41,13 @@
 		width:120px;
 	}
 	
-	.user-item .detail{
-		display:none;
+	.user-item.even{
+		background-color:#fdfbf4;
 	}
+	
+		.user-item .detail{
+			display:none;
+		}
 	
 	.sent-on.col{
 		width:200px;
@@ -60,6 +64,27 @@
 		display:none;
 	}
 	
+	.detail{}
+	
+		.detail h4{
+			margin-bottom:0.25em;
+		}
+		
+		.detail .email-sent-detail{
+			margin-left:2%; 
+			width:48%;
+		}
+			
+		.detail .link-detail{
+			float:right; 
+			width:48%;
+		}
+		
+			#content .detail .link-detail ul{
+				margin-top:0;
+				margin-left:0;
+			}
+			
 	/*----------------------------------------------
 	Clearing floats hack
 	----------------------------------------------*/
@@ -122,6 +147,15 @@
 			function()
 			{
 				$(this).parent().parent().next().slideToggle();
+				
+				if ( $(this).text() == 'Show' )
+				{
+					$(this).text( 'Hide' );
+				}
+				else
+				{
+					$(this).text( 'Show' );
+				}
 			}
 		);
 		
@@ -132,15 +166,26 @@
 			function()
 			{
 				$( '#body-container' ).slideToggle();
+				
+				if ( $(this).text() == 'Show email body' )
+				{
+					$(this).text( 'Hide email body' );
+				}
+				else
+				{
+					$(this).text( 'Show email body' );
+				}
 			}
 		);
 	});
 </script> 
 
 <cfoutput>
-	<h1>#HTMLEditFormat( report.email.subject )#</h1>
+	<p>#linkTo( controller="wheels", action="wheels", params="view=plugins&name=trackemail&page=emails", text="<< back" )#</p>
+	
+	<h2>#HTMLEditFormat( report.email.subject )#</h2>
 		
-	<p><a id="view-body-link" href="javascript:void(0);">View body</a></p>
+	<p><a id="view-body-link" href="javascript:void(0);">Show email body</a></p>
 	
 	<div id="body-container">
 		#report.email.body#
@@ -170,7 +215,8 @@
 	<div class="view-detail col">Detail</div>
 			
 </div>
-		
+
+<cfset rowCount = 1 />		
 <cfoutput 
 	query="report.emails" 
 	group="recipient">
@@ -247,7 +293,7 @@
 	
 	</cfsavecontent>
 	
-	<div class="user-item clearhack">
+	<div class="user-item clearhack <cfif rowCount Mod 2 eq 0>even</cfif>">
 		
 		<div class="overview">
 		
@@ -255,25 +301,27 @@
 			<div class="sent col">#sentTotalCount#</div>
 			<div class="views col">#viewTotalCount#</div>
 			<div class="clicks col">#clickTotalCount#</div>
-			<div class="view-detail col"><a href="javascript:void(0);">view</a></div>
+			<div class="view-detail col"><a href="javascript:void(0);">Show</a></div>
 			
 		</div>
 	
 		<div class="detail">
 		
-			<div style="float:left; width:50%;">
+			<div class="email-sent-detail col">
 		
 				<h4>Emails sent</h4>
 		
-				#sentContent#
+				<div>
+					#sentContent#
+				</div>
 			
 			</div>
 			
-			<div style="float:right; width:50%;">
+			<div class="link-detail col">
 				
 				<h4>Link summary</h4>
 				
-				<ul style="margin-left:0;">
+				<ul>
 					<cfloop 
 					collection=#linkTotalClickCount# 
 					item="l">
@@ -290,7 +338,8 @@
 			
 		</div>
 		
-		
 	</div>
+	
+	<cfset rowCount++ />
 	
 </cfoutput>

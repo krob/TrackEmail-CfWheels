@@ -422,7 +422,7 @@ Adds the following process to the sendEmail function
 				trackemail_emails.id = trackemail_sent.emailId
 				
 			WHERE
-				trackemail_emails.site = <cfqueryparam cfsqltype="cf_sql_string" value="#this.site#" />
+				trackemail_emails.site = <cfqueryparam cfsqltype="cf_sql_varchar" value="#this.site#" />
 				
 			GROUP BY
 				trackemail_emails.id,
@@ -764,6 +764,8 @@ Adds the following process to the sendEmail function
 					</cfif>
 					
 					<cfset loc.row = Left( loc.row, Len( loc.row ) - 1 ) & "]," />
+					
+					#loc.row#
 					
 					<cfset loc.count++ />
 					

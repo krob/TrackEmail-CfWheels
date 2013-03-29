@@ -4,7 +4,7 @@
 	<cfset emails = getEmails() />
 </cfsilent>
 
-<h1>Emails Sent</h1>
+<h2>Emails Sent</h2>
 
 <p>Click on an email to see a report.</p>
 
