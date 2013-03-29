@@ -218,7 +218,7 @@
 
 <cfset rowCount = 1 />		
 <cfoutput 
-	query="report.emails" 
+	query="report.recipientData" 
 	group="recipient">
 	
 	<cfset sentTotalCount = 0 />
