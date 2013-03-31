@@ -18,7 +18,7 @@ Adds the following process to the sendEmail function
 				output="false"
 				hint="Initialize component">
 		
-		<cfset this.version = "0.1" />
+		<cfset this.version = "1.0" />
 		
 		<cfset _initVars() />
 		
