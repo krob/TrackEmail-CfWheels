@@ -4,3 +4,4 @@
 --->
 <cfset set(environment="development")>
 <cfset set(overwritePlugins=false)>
+<cfset set(deletePluginDirectories=false)>
