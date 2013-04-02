@@ -1,5 +1,11 @@
 <!--- Display a tracking report for an email --->
 
+<cfinclude template="_security.cfm" />
+
+<cfif NOT adminAuthorized>
+	<cfabort />
+</cfif>	
+
 <cfsilent>
 	<cfparam name="form.startDate" default="#DateAdd( 'm', -1, now() )#" />
 	<cfparam name="form.endDate" default="#now()#" />

@@ -1,5 +1,11 @@
 <!--- Display a list of emails that are being tracked --->
 
+<cfinclude template="_security.cfm" />
+
+<cfif NOT adminAuthorized>
+	<cfabort />
+</cfif>	
+	
 <cfsilent>
 	<cfset emails = getEmails() />
 </cfsilent>

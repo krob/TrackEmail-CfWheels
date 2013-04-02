@@ -2,9 +2,13 @@
 
 <h3>Report</h3>
 
-<cfoutput>
-<p>#linkTo( controller="wheels", action="wheels", params="view=plugins&name=trackemail&page=emails", text="View the emails sent." )#</p>
-</cfoutput>
+<cfinclude template="_security.cfm" />
+
+<cfif adminAuthorized>
+	<cfoutput>
+	<p>#linkTo( controller="wheels", action="wheels", params="view=plugins&name=trackemail&page=emails", text="View the emails sent." )#</p>
+	</cfoutput>
+</cfif>
 
 <h3>How to use</h3>
 
