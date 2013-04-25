@@ -12,6 +12,7 @@ Adds the following process to the sendEmail function
 
 <cfcomponent output="false" mixin="controller,dispatch">
 
+
 	<cffunction name="init" 
 				returntype="any" 
 				access="public" 
@@ -19,10 +20,6 @@ Adds the following process to the sendEmail function
 				hint="Initialize component">
 		
 		<cfset this.version = "1.01" />
-		
-		<cfset _trackEmail_initVars() />
-		
-		<cfset _trackEmail_createTables() />
 		
 		<cfreturn this />
 		
@@ -232,7 +229,7 @@ Adds the following process to the sendEmail function
 		<cfset var loc = {} />
 		<cfset loc.tableCheck = {} />
 		
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
 		<cfset loc.tableCheck.emails = _trackEmail_checkEmailTable() />
 		<cfset loc.tableCheck.links = _trackEmail_checkLinkTable() />
@@ -246,7 +243,7 @@ Adds the following process to the sendEmail function
 	
 	<cffunction name="_trackEmail_createEmailTable" 
 				returntype="void" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Create the email table">
 		
@@ -272,7 +269,7 @@ Adds the following process to the sendEmail function
 
 	<cffunction name="_trackEmail_createLinkTable" 
 				returntype="void" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Create the link table">
 		
@@ -295,14 +292,40 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_trackEmail_createTables" 
+	<cffunction name="_trackEmail_createSentTable" 
 				returntype="void" 
-				access="private" 
+				access="public" 
+				output="false"
+				hint="Create the sent table">
+		
+		<cfset var loc = {} />
+		
+		<cfquery 
+			name="loc.createSentTable" 
+			datasource="#this.dsn#">
+				
+			CREATE TABLE trackemail_sent(
+				id char(35) NOT NULL,
+				emailid int NOT NULL,
+				recipient varchar(255) NOT NULL,
+				createdAt datetime NOT NULL,
+				CONSTRAINT "pk_trackemail_sent-id" PRIMARY KEY (id)
+			)
+					
+		</cfquery>
+
+	</cffunction>
+	
+	
+	<cffunction name="trackEmail_createTables" 
+				returntype="void" 
+				access="public" 
 				output="false"
 				hint="Create the tables needed for tracking">
 		
 		<cftry>
-			
+			<cfset _trackEmail_initVars() />
+		
 			<cfif NOT _trackEmail_checkEmailTable()>
 				<cfset _trackEmail_createEmailTable() />
 			</cfif>
@@ -328,34 +351,9 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_trackEmail_createSentTable" 
-				returntype="void" 
-				access="private" 
-				output="false"
-				hint="Create the sent table">
-		
-		<cfset var loc = {} />
-		
-		<cfquery 
-			name="loc.createSentTable" 
-			datasource="#this.dsn#">
-				
-			CREATE TABLE trackemail_sent(
-				id char(35) NOT NULL,
-				emailid int NOT NULL,
-				recipient varchar(255) NOT NULL,
-				createdAt datetime NOT NULL,
-				CONSTRAINT "pk_trackemail_sent-id" PRIMARY KEY (id)
-			)
-					
-		</cfquery>
-
-	</cffunction>
-	
-	
 	<cffunction name="_trackEmail_createViewTable" 
 				returntype="void" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Create the view table">
 		

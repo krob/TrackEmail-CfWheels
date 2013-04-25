@@ -6,9 +6,10 @@
 <ul>
 	<li>Copy the <em>TrackEmails.cfc</em> file from <em>/plugins/TrackEmail/controllers/</em> to <em>/controllers/</em>.</li>
 	<li>Copy the <em>trackemails</em> folder from <em>/plugins/TrackEmail/views/</em> to <em>/views/</em>.</li>
+	<li>#linkTo( controller="trackemails", action="install", text="Click here" )# to try and create tables.</li>
 </ul>
 
-<p>#linkTo( controller="trackemails", action="install", text="Check" )# if everything installed correctly.</p>
+<p>#linkTo( controller="trackemails", action="check-install", text="Check" )# if everything installed correctly.</p>
 
 <h2>How to use</h2>
 

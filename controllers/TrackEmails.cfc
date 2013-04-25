@@ -1,7 +1,7 @@
 <cfcomponent extends="Controller" output="false">
 
 	<cffunction name="init">
-		<cfset filters( through="isLoggedIn", except="track,login,security,install" ) />
+		<cfset filters( through="isLoggedIn", except="track,login,security,checkinstall,install" ) />
 	</cffunction>
 	
 	
@@ -12,13 +12,13 @@
 	</cffunction>
 
 
-	<cffunction name="install">
+	<cffunction name="checkInstall">
 		
 		<cfset var loc = {} />
 		
 		<cfset installSuccess = true />
 			
-		<!--- <cftry> --->
+		<cftry>
 			<cfset loc.tableCheck = trackEmail_checkTables() />
 				
 			<cfif NOT loc.tableCheck.emails
@@ -35,16 +35,25 @@
 			<cfset flashInsert( alertSent="Sent table exists: #loc.tableCheck.sent#" ) />
 			<cfset flashInsert( alertViews="View table exists: #loc.tableCheck.views#" ) />
 				
-			<!--- <cfcatch>
+			<cfcatch>
 				<cfset installSuccess = false />
 			</cfcatch>
-		</cftry> --->
+		</cftry>
 			
 		<cfif installSuccess>
 			<cfset flashInsert( success="Install successfull." ) />
 		<cfelse>
 			<cfset flashInsert( error="Install unsuccessfull." ) />
 		</cfif>
+		
+	</cffunction>
+	
+	
+	<cffunction name="install">
+		
+		<cfset trackEmail_createTables() />
+				
+		<cfset redirectTo( action="checkinstall" ) />
 		
 	</cffunction>
 	
