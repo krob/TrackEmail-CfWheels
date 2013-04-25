@@ -1,20 +1,19 @@
-<cfparam name="params.page" default="" />
+<h2>Track email plugin</h2>
 
-<cfif params.page eq "report">
-	
-	<cfinclude template="views/report.cfm" />
-	
-<cfelseif params.page eq "emails">
+<h3>How to use</h3>
 
-	<cfinclude template="views/emails.cfm" />
-	
-<cfelseif params.page eq "track">
+<p>To track emails all you have to do is add <code class="inline">track=true</code> to the arguments of your sendEmail call.</p>
 
-	<cfinclude template="views/track.cfm" />
-	
-<cfelse>
+<h4>Example usage</h4>
 
-	<cfinclude template="views/default.cfm" />
-	
-</cfif>
+<code class="block">
+	sendEmail(<br />
+		&nbsp;&nbsp;&nbsp;&nbsp;from="john.doe@email.com",<br />
+		&nbsp;&nbsp;&nbsp;&nbsp;to="jane.doe@email.com",<br />
+		&nbsp;&nbsp;&nbsp;&nbsp;subject="Dear Jane",<br />
+		&nbsp;&nbsp;&nbsp;&nbsp;template=genericemailtemplate,<br />
+		&nbsp;&nbsp;&nbsp;&nbsp;track=true<br />
+	)
+</code>
 
+<p>The <code class="inline">track</code> argument is <code class="inline">false</code> by default.</p>

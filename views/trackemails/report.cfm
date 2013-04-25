@@ -1,19 +1,5 @@
 <!--- Display a tracking report for an email --->
 
-<cfinclude template="_security.cfm" />
-
-<cfif NOT adminAuthorized>
-	<cfabort />
-</cfif>	
-
-<cfsilent>
-	<cfparam name="form.startDate" default="#DateAdd( 'm', -1, now() )#" />
-	<cfparam name="form.endDate" default="#now()#" />
-	
-	<cfset report = getEmailReport( emailid=url.emailid, startDate=#form.startDate#, endDate=#form.endDate# ) />
-	
-</cfsilent>
-
 <style>
 	.user-header{
 		margin-top:2.5em;
@@ -187,7 +173,7 @@
 </script> 
 
 <cfoutput>
-	<p>#linkTo( controller="wheels", action="wheels", params="view=plugins&name=trackemail&page=emails", text="<< back" )#</p>
+	<p>#linkTo( action="emails", text="<< back" )#</p>
 	
 	<h2>#HTMLEditFormat( report.email.subject )#</h2>
 		
@@ -199,8 +185,8 @@
 	
 	<p>
 		<form method="post">
-			From: <input type="text" name="startDate" value="#DateFormat( form.startDate, 'mm/dd/yyyy' )#" />
-			To: <input type="text" name="endDate" value="#DateFormat( form.endDate, 'mm/dd/yyyy' )#" />
+			From: <input type="text" name="startDate" value="#DateFormat( params.startDate, 'mm/dd/yyyy' )#" />
+			To: <input type="text" name="endDate" value="#DateFormat( params.endDate, 'mm/dd/yyyy' )#" />
 			<button type="submit">Submit</button>
 		</form>
 	</p>

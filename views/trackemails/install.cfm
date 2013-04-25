@@ -1,0 +1,5 @@
+<cfoutput>
+
+#flashMessages()#
+
+</cfoutput>

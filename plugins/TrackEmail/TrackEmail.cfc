@@ -80,7 +80,7 @@ Adds the following process to the sendEmail function
 			}
 			
 			//Create the base tracking url
-			loc.trackUrl = "#this.baseUrl#index.cfm?controller=wheels&action=wheels&view=plugins&name=trackemail&page=track&e=#arguments.uuid#";
+			loc.trackUrl = "#this.baseUrl#index.cfm?controller=trackemails&action=track&e=#arguments.uuid#";
 			
 			//Replace the links in the email with a tracking link
 			loc.content = Replace( arguments.content, '<a href="', '<a href="#loc.trackUrl#&t=l&u=', 'all' );
@@ -97,7 +97,7 @@ Adds the following process to the sendEmail function
 	
 	<cffunction name="_checkEmailTable" 
 				returntype="boolean" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Check if the email table exists">
 		
@@ -129,7 +129,7 @@ Adds the following process to the sendEmail function
 	
 	<cffunction name="_checkLinkTable" 
 				returntype="boolean" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Check if the link table exists">
 		
@@ -161,7 +161,7 @@ Adds the following process to the sendEmail function
 	
 	<cffunction name="_checkSentTable" 
 			returntype="boolean" 
-			access="private" 
+			access="public" 
 			output="false"
 			hint="Check if the sent table exists">
 		
@@ -193,7 +193,7 @@ Adds the following process to the sendEmail function
 	
 	<cffunction name="_checkViewTable" 
 				returntype="boolean" 
-				access="private" 
+				access="public" 
 				output="false"
 				hint="Check if the view table exists">
 		
@@ -219,6 +219,27 @@ Adds the following process to the sendEmail function
 		</cftry>
 		
 		<cfreturn loc.valid />
+		
+	</cffunction>
+	
+	
+	<cffunction name="trackEmail_checkTables" 
+				returntype="struct" 
+				access="public" 
+				output="false"
+				hint="Check if all the tables exist">
+		
+		<cfset var loc = {} />
+		<cfset loc.tableCheck = {} />
+		
+		<cfset _initVars() />
+		
+		<cfset loc.tableCheck.emails = _checkEmailTable() />
+		<cfset loc.tableCheck.links = _checkLinkTable() />
+		<cfset loc.tableCheck.sent = _checkSentTable() />
+		<cfset loc.tableCheck.views = _checkViewTable() />
+		
+		<cfreturn loc.tableCheck />
 		
 	</cffunction>
 	
@@ -397,7 +418,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="getEmails" 
+	<cffunction name="trackEmail_getEmails" 
 				returntype="query" 
 				access="public" 
 				output="false"
@@ -436,7 +457,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 
-	<cffunction name="getEmailReport" 
+	<cffunction name="trackEmail_getEmailReport" 
 				returntype="struct" 
 				access="public" 
 				output="true"
@@ -1228,7 +1249,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="logLink" 
+	<cffunction name="trackEmail_logLink" 
 				returntype="void" 
 				access="public" 
 				output="false"
@@ -1253,7 +1274,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="logView" 
+	<cffunction name="trackEmail_logView" 
 				returntype="void" 
 				access="public" 
 				output="false"
