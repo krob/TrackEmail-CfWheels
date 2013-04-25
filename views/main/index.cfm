@@ -1,3 +1,15 @@
+<cfoutput>
+<h2>How to install</h2>
+
+<p>After cfwheels extracts the content of the zip file do the following.</p>
+
+<ul>
+	<li>Copy the <em>TrackEmails.cfc</em> file from <em>/plugins/TrackEmail/controllers/</em> to <em>/controllers/</em>.</li>
+	<li>Copy the <em>trackemails</em> folder from <em>/plugins/TrackEmail/views/</em> to <em>/views/</em>.</li>
+	<li>#linkTo( controller="trackemails", action="install", text="Click here" )# to try and create tables.</li>
+</ul>
+
+<p>#linkTo( controller="trackemails", action="check-install", text="Check" )# if everything installed correctly.</p>
 
 <h2>How to use</h2>
 
@@ -17,7 +29,6 @@
 
 <p>The <code class="inline">track</code> argument is <code class="inline">false</code> by default.</p>
 
-<cfoutput>
 <h2>Send test email</h2>
 
 <form method="post" action="#urlFor( action='send-test' )#">
@@ -32,5 +43,5 @@
 
 <h2>View Reports</h2>
 
-<p>#linkTo( controller="wheels", action="wheels", params="view=plugins&name=trackemail&page=emails", text="View the emails sent." )#</p>
+<p>#linkTo( controller="trackemails", action="emails", text="View the emails sent." )#</p>
 </cfoutput>
