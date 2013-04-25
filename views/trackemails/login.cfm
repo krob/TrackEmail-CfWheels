@@ -3,7 +3,6 @@
 	#flashMessages( key="error" )#
 </cfif>
 
-
 <p>Log in to view the reports, the default password is <em>password</em></p>
 	
 <form method="post" action="#UrlFor( action='security' )#">

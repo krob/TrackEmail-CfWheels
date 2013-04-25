@@ -20,16 +20,16 @@ Adds the following process to the sendEmail function
 		
 		<cfset this.version = "1.01" />
 		
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
-		<cfset _createTables() />
+		<cfset _trackEmail_createTables() />
 		
 		<cfreturn this />
 		
 	</cffunction>
 	
 	
-	<cffunction name="_initVars" 
+	<cffunction name="_trackEmail_initVars" 
 				returntype="void" 
 				access="public" 
 				output="false"
@@ -48,7 +48,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_addTracking" 
+	<cffunction name="_trackEmail_addTracking" 
 				returntype="string" 
 				access="public" 
 				output="false"
@@ -71,7 +71,7 @@ Adds the following process to the sendEmail function
 			var loc = {};
 			
 			//Set variables to use
-			_initVars();
+			_trackEmail_initVars();
 			
 			//Add ending slash if doesn't exist
 			if ( Right( this.baseUrl, 1 ) != '/' )
@@ -95,7 +95,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_checkEmailTable" 
+	<cffunction name="_trackEmail_checkEmailTable" 
 				returntype="boolean" 
 				access="public" 
 				output="false"
@@ -127,7 +127,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_checkLinkTable" 
+	<cffunction name="_trackEmail_checkLinkTable" 
 				returntype="boolean" 
 				access="public" 
 				output="false"
@@ -159,7 +159,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_checkSentTable" 
+	<cffunction name="_trackEmail_checkSentTable" 
 			returntype="boolean" 
 			access="public" 
 			output="false"
@@ -191,7 +191,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_checkViewTable" 
+	<cffunction name="_trackEmail_checkViewTable" 
 				returntype="boolean" 
 				access="public" 
 				output="false"
@@ -234,17 +234,17 @@ Adds the following process to the sendEmail function
 		
 		<cfset _initVars() />
 		
-		<cfset loc.tableCheck.emails = _checkEmailTable() />
-		<cfset loc.tableCheck.links = _checkLinkTable() />
-		<cfset loc.tableCheck.sent = _checkSentTable() />
-		<cfset loc.tableCheck.views = _checkViewTable() />
+		<cfset loc.tableCheck.emails = _trackEmail_checkEmailTable() />
+		<cfset loc.tableCheck.links = _trackEmail_checkLinkTable() />
+		<cfset loc.tableCheck.sent = _trackEmail_checkSentTable() />
+		<cfset loc.tableCheck.views = _trackEmail_checkViewTable() />
 		
 		<cfreturn loc.tableCheck />
 		
 	</cffunction>
 	
 	
-	<cffunction name="_createEmailTable" 
+	<cffunction name="_trackEmail_createEmailTable" 
 				returntype="void" 
 				access="private" 
 				output="false"
@@ -270,7 +270,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 
 
-	<cffunction name="_createLinkTable" 
+	<cffunction name="_trackEmail_createLinkTable" 
 				returntype="void" 
 				access="private" 
 				output="false"
@@ -295,7 +295,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_createTables" 
+	<cffunction name="_trackEmail_createTables" 
 				returntype="void" 
 				access="private" 
 				output="false"
@@ -303,20 +303,20 @@ Adds the following process to the sendEmail function
 		
 		<cftry>
 			
-			<cfif NOT _checkEmailTable()>
-				<cfset _createEmailTable() />
+			<cfif NOT _trackEmail_checkEmailTable()>
+				<cfset _trackEmail_createEmailTable() />
 			</cfif>
 			
-			<cfif NOT _checkLinkTable()>
-				<cfset _createLinkTable() />
+			<cfif NOT _trackEmail_checkLinkTable()>
+				<cfset _trackEmail_createLinkTable() />
 			</cfif>
 			
-			<cfif NOT _checkSentTable()>
-				<cfset _createSentTable() />
+			<cfif NOT _trackEmail_checkSentTable()>
+				<cfset _trackEmail_createSentTable() />
 			</cfif>
 			
-			<cfif NOT _checkViewTable()>
-				<cfset _createViewTable() />
+			<cfif NOT _trackEmail_checkViewTable()>
+				<cfset _trackEmail_createViewTable() />
 			</cfif>
 			
 			<cfcatch>
@@ -328,7 +328,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_createSentTable" 
+	<cffunction name="_trackEmail_createSentTable" 
 				returntype="void" 
 				access="private" 
 				output="false"
@@ -353,7 +353,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_createViewTable" 
+	<cffunction name="_trackEmail_createViewTable" 
 				returntype="void" 
 				access="private" 
 				output="false"
@@ -377,7 +377,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 
-	<cffunction name="_emailExists" 
+	<cffunction name="_trackEmail_emailExists" 
 				returntype="any" 
 				access="public" 
 				output="false"
@@ -391,7 +391,7 @@ Adds the following process to the sendEmail function
 			
 		<cfset var loc = {} />
 		
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
 		<cfquery 
 			name="loc.emailExists" 
@@ -427,7 +427,7 @@ Adds the following process to the sendEmail function
 		<cfset var loc = {} />
 
 		<!--- Set variables to use --->
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
 		<cfquery 
 			name="loc.emails" 
@@ -491,7 +491,7 @@ Adds the following process to the sendEmail function
 		<cfset loc.days = Abs( DateDiff( "d", loc.startDate, loc.endDate ) ) />
 		
 		<!--- Set variables to use --->
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
 		<!--- Get the record for this email to display subject and body --->
 		<cfquery
@@ -511,19 +511,19 @@ Adds the following process to the sendEmail function
 		
 		<cfset loc.report.email = loc.getEmail />
 		
-		<cfset loc.report.recipientData = _getRecipientData(
+		<cfset loc.report.recipientData = _trackEmail_getRecipientData(
 			startDate = loc.startDate,
 			endDate = loc.endDate,
 			emailId = arguments.emailId	
 		) />
 		
-		<cfset loc.summaryByDate = _getSummaryByDate(
+		<cfset loc.summaryByDate = _trackEmail_getSummaryByDate(
 			startDate = loc.startDate,
 			endDate = loc.endDate,
 			emailId = arguments.emailId	
 		) />
 		
-		<cfset loc.linkClicksByDate = _getLinkClicksByDate(
+		<cfset loc.linkClicksByDate = _trackEmail_getLinkClicksByDate(
 			startDate = loc.startDate,
 			endDate = loc.endDate,
 			emailId = arguments.emailId	
@@ -675,7 +675,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_getLinkClicksByDate"
+	<cffunction name="_trackEmail_getLinkClicksByDate"
 				returnType="query"
 				access="public"
 				output="false"
@@ -734,7 +734,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_getRecipientData"
+	<cffunction name="_trackEmail_getRecipientData"
 				returnType="query"
 				access="public"
 				output="false"
@@ -827,7 +827,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_getSummaryByDate"
+	<cffunction name="_trackEmail_getSummaryByDate"
 				returnType="query"
 				access="public"
 				output="false"
@@ -920,7 +920,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_insertEmail" 
+	<cffunction name="_trackEmail_insertEmail" 
 				returntype="numeric" 
 				access="public" 
 				output="false"
@@ -940,7 +940,7 @@ Adds the following process to the sendEmail function
 		
 		<cfset var loc = {} />
 		
-		<cfset _initVars() />
+		<cfset _trackEmail_initVars() />
 		
 		<cfquery 
 			name="loc.insertEmail" 
@@ -970,7 +970,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_insertLink" 
+	<cffunction name="_trackEmail_insertLink" 
 				returntype="void" 
 				access="public" 
 				output="false"
@@ -989,7 +989,6 @@ Adds the following process to the sendEmail function
 			hint="The link the user clicked" />
 		
 		<cfset var loc = {} />
-		
 		
 		<cfquery 
 			name="loc.insertLink" 
@@ -1014,7 +1013,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_insertSent" 
+	<cffunction name="_trackEmail_insertSent" 
 				returntype="string" 
 				access="public" 
 				output="false"
@@ -1063,7 +1062,7 @@ Adds the following process to the sendEmail function
 	</cffunction>
 	
 	
-	<cffunction name="_insertView" 
+	<cffunction name="_trackEmail_insertView" 
 				returntype="void" 
 				access="public" 
 				output="false"
@@ -1095,6 +1094,51 @@ Adds the following process to the sendEmail function
 		</cfquery>
 
 	</cffunction>
+	
+	
+	<cffunction name="trackEmail_logLink" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone clicked on a link in an email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true"
+			hint="The id of the email that was sent" />
+			
+		<cfargument 
+			name="link" 
+			type="string" 
+			required="true"
+			hint="The link the user clicked" />
+		
+		<cfset _trackEmail_initVars() />
+		
+		<cfset _trackEmail_insertLink( sentId=arguments.sentId, link=arguments.link ) />
+
+	</cffunction>
+	
+	
+	<cffunction name="trackEmail_logView" 
+				returntype="void" 
+				access="public" 
+				output="false"
+				hint="Log that someone viewed the email">
+	
+		<cfargument 
+			name="sentId" 
+			type="string" 
+			required="true"
+			hint="The id of the email that was sent" />
+			
+		<cfset _trackEmail_initVars() />
+		
+		<cfset _trackEmail_insertView( sentId=arguments.sentId ) />
+
+	</cffunction>
+	
 	
 	
 	<cffunction name="sendEmail" returntype="any" access="public" output="false" hint="Sends an email using a template and an optional layout to wrap it in. Besides the Wheels-specific arguments documented here, you can also pass in any argument that is accepted by the `cfmail` tag as well as your own arguments to be used by the view."
@@ -1187,10 +1231,10 @@ Adds the following process to the sendEmail function
 			// does user wnat to track email
 			if ( loc.track )
 			{
-				_initVars();
+				_trackEmail_initVars();
 				
 				// get email id if it exists
-				loc.emailId = this._emailExists( subject=arguments.subject );
+				loc.emailId = this._trackEmail_emailExists( subject=arguments.subject );
 				
 				// if email doesn't exists get body and insert
 				if ( loc.emailId == false )
@@ -1205,20 +1249,20 @@ Adds the following process to the sendEmail function
 					}
 				
 					// insert email and get email id
-					loc.emailId = this._insertEmail( subject=arguments.subject, body=loc.body );
+					loc.emailId = this._trackEmail_insertEmail( subject=arguments.subject, body=loc.body );
 				}
 				
 				// insert a sent record for this email, returns uuid of sent record
-				loc.uuid = this._insertSent( emailId=loc.emailId, recipient=arguments.to );
+				loc.uuid = this._trackEmail_insertSent( emailId=loc.emailId, recipient=arguments.to );
 				
 				// return email body with tracking code added	
 				if ( NOT StructKeyExists( arguments, "mailparts" ) == 1 && arguments.type == "html" )
 				{
-					arguments.tagContent = this._addTracking( content=arguments.tagContent, uuid=loc.uuid );
+					arguments.tagContent = this._trackEmail_addTracking( content=arguments.tagContent, uuid=loc.uuid );
 				}
 				else
 				{
-					arguments.mailparts[ 2 ].tagContent = this._addTracking( content=arguments.mailparts[ 2 ].tagContent, uuid=loc.uuid );
+					arguments.mailparts[ 2 ].tagContent = this._trackEmail_addTracking( content=arguments.mailparts[ 2 ].tagContent, uuid=loc.uuid );
 				}
 			}
 			
@@ -1247,49 +1291,4 @@ Adds the following process to the sendEmail function
 		</cfscript>
 		
 	</cffunction>
-	
-	
-	<cffunction name="trackEmail_logLink" 
-				returntype="void" 
-				access="public" 
-				output="false"
-				hint="Log that someone clicked on a link in an email">
-	
-		<cfargument 
-			name="sentId" 
-			type="string" 
-			required="true"
-			hint="The id of the email that was sent" />
-			
-		<cfargument 
-			name="link" 
-			type="string" 
-			required="true"
-			hint="The link the user clicked" />
-		
-		<cfset _initVars() />
-		
-		<cfset _insertLink( sentId=arguments.sentId, link=arguments.link ) />
-
-	</cffunction>
-	
-	
-	<cffunction name="trackEmail_logView" 
-				returntype="void" 
-				access="public" 
-				output="false"
-				hint="Log that someone viewed the email">
-	
-		<cfargument 
-			name="sentId" 
-			type="string" 
-			required="true"
-			hint="The id of the email that was sent" />
-			
-		<cfset _initVars() />
-		
-		<cfset _insertView( sentId=arguments.sentId ) />
-
-	</cffunction>
-	
 </cfcomponent>

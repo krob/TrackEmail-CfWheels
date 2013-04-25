@@ -61,47 +61,7 @@
 	</cffunction>
 	
 	
-	<cffunction name="login">
-		
-		<cfset var loc = {} />
-		
-		<cfif StructKeyExists( params, "installsuccess" )>
-			<cfset installSuccess = true />
-			
-			<cftry>
-				<cfset loc.checkEmailTable = _checkEmailTable() />
-				<cfset loc.checkLinkTable = _checkLinkTable() />
-				<cfset loc.checkSentTable = _checkSentTable() />
-				<cfset loc.checkViewTable = _checkViewTable() />
-				
-				<cfif NOT loc.checkEmailTable
-						OR NOT loc.checkLinkTable
-						OR NOT loc.checkSentTable
-						OR NOT loc.checkViewTable>
-					
-					<cfset installSuccess = false />
-					
-				</cfif>
-				
-				<cfset flashInsert( alert="Email table exists: #loc.checkEmailTable#" ) />
-				<cfset flashInsert( alert="Link table exists: #loc.checkLinkTable#" ) />
-				<cfset flashInsert( alert="Sent table exists: #loc.checkSentTable#" ) />
-				<cfset flashInsert( alert="View table exists: #loc.checkViewTable#" ) />
-				
-				<cfcatch>
-					<cfset installSuccess = false />
-				</cfcatch>
-			</cftry>
-			
-			<cfif installSuccess>
-				<cfset flashInsert( success="Install successfull." ) />
-			<cfelse>
-				<cfset flashInsert( error="Install unsuccessfull." ) />
-			</cfif>
-			
-		</cfif>
-		
-	</cffunction>
+	<cffunction name="login"></cffunction>
 	
 	
 	<cffunction name="report">
