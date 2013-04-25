@@ -3,6 +3,16 @@ TrackEmail-CfWheels
 
 A cfwheels plugin that adds the ability to track email views and clicks
 
+<h3>How to install</h3>
+
+<p>After cfwheels extracts the content of the zip file do the following.</p>
+
+<ul>
+	<li>Copy the <em>TrackEmails.cfc</em> file from <em>/plugins/TrackEmail/controllers/</em> to <em>/controllers/</em>.</li>
+	<li>Copy the <em>trackemails</em> folder from <em>/plugins/TrackEmail/views/</em> to <em>/views/</em>.</li>
+	<li>Go to index.cfm?controller=trackemails&action=install to try to create tables. If it fails there is ms sql server script to create the tables.</li>
+</ul>
+
 <h3>How to use</h3>
 
 <p>To track emails all you have to do is add <code class="inline">track=true</code> to the arguments of your sendEmail call.</p>
