@@ -77,7 +77,7 @@ Adds the following process to the sendEmail function
 			}
 			
 			//Create the base tracking url
-			loc.trackUrl = "#this.baseUrl#index.cfm?controller=trackemails&action=track&e=#arguments.uuid#";
+			loc.trackUrl = "#this.baseUrl#rewrite.cfm?controller=trackemails&action=track&e=#arguments.uuid#";
 			
 			//Replace the links in the email with a tracking link
 			loc.content = Replace( arguments.content, '<a href="', '<a href="#loc.trackUrl#&t=l&u=', 'all' );
